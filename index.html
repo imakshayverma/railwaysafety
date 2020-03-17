@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Scrollama: Sticky Overlay Example</title>
+    <meta name="description" content="Scrollama: Sticky Overlay Example" />
+    <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v1.6.1/mapbox-gl.css" rel="stylesheet" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css?family=Lato:300,400,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./style.css" />
+    <style>
+    body {
+        font-family: Lato, sans-serif;
+    }
+
+    #scrolly {
+        position: relative;
+    }
+
+    article {
+        position: relative;
+        padding: 0;
+        max-width: 20rem;
+        margin: 40px 10px 0px 40px;
+    }
+
+    .background-overlay {
+        position: -webkit-sticky;
+        position: sticky;
+        left: 0;
+        width: 100%;
+        margin: 0;
+        height: 100vh;
+        background-image: linear-gradient(rgba(255, 255, 255, 0), rgba(0, 0, 0, 1));
+        -webkit-transform: translate3d(0, 0, 0);
+        -moz-transform: translate3d(0, 0, 0);
+        transform: translate3d(0, 0, 0);
+        /*background-color: #8a8a8a;*/
+        z-index: 0;
+    }
+
+    .background-overlay #map-wrapper {
+        text-align: center;
+        position: absolute;
+        width: 100%;
+        height: 100vh;
+        font-weight: 900;
+        color: #fff;
+    }
+
+    .step {
+        margin: 0 auto 2rem auto;
+        color: #fff;
+        background-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .step:last-child {
+        margin-bottom: 0;
+    }
+
+    .step.is-active p {
+        background-color: goldenrod;
+        color: #3b3b3b;
+    }
+
+    .step p {
+        text-align: center;
+        padding: 1rem;
+        font-size: 1.5rem;
+        background-color: #3b3b3b;
+    }
+
+    .mapboxgl-canvas {
+        left: 0px;
+    }
+
+    .transition-section {
+        margin-bottom: 250px;
+        background-image: linear-gradient(white, transparent);
+    }
+
+    #intro {
+        height: 100vh;
+        overflow-y: hidden;
+    }
+
+    .main-img {
+        width: 100%;
+
+    }
+
+    .headline {
+        position: absolute;
+        display: flex;
+        /*margin: 450px 100px 0px 0px;
+        bottom:120px;*/
+        margin-top: calc(100vh - 200px);
+        box-sizing: border-box;
+        width: 100%;
+        color: white;
+        padding: 20px 0px;
+        font-weight: 300;
+    }
+
+    .left-placeholder {
+        background: rgba(191, 145, 40, 0.77);
+
+        margin-right: 10px;
+        padding: 30px;
+        /* display: flex; */
+        width: 15%;
+    }
+
+    .headline-text {
+        /* display: flex; */
+        background: rgba(0, 0, 0, 0.91);
+        width: 85%;
+        padding: 20px 30px;
+        text-align: left;
+        font-weight: 300;
+    }
+
+    .shadow {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        box-shadow: inset 3px 3px 110px 0 #000000;
+        /* border-radius: 20px; */
+        top: 0;
+        left: 0;
+        /* box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important; */
+    }
+
+    .main-header {
+        font-weight: 900;
+        font-size: 30px;
+        /* margin-bottom: 0px; */
+    }
+
+    .sub-header {
+        font-weight: 300;
+        font-size: 18px;
+        max-width: 600px;
+        margin-bottom: 5px;
+        line-height: 20px;
+    }
+
+    .section-1-text {
+        font-size: 20px;
+        font-weight: 300;
+        margin-right: 50px;
+    }
+
+    #section-1 {
+        text-align: center;
+        margin: 0px auto;
+        margin-top: 100px;
+        margin-bottom: 100px;
+        width: 650px;
+    }
+
+    .flex-container {
+        display: flex;
+    }
+
+    .section-1-text {
+        text-align: left;
+    }
+
+    .section-1-pic img {
+        width: 350px;
+    }
+
+    .shadow-effect {
+        position: relative;
+        -webkit-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.1) inset;
+        -moz-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.1) inset;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.1) inset;
+    }
+
+    .shadow-effect:before,
+    .shadow-effect:after {
+        content: "";
+        position: absolute;
+        z-index: -1;
+        -webkit-box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+        -moz-box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+        top: 50%;
+        bottom: 0;
+        left: 10px;
+        right: 10px;
+        -moz-border-radius: 100px / 10px;
+        border-radius: 100px / 10px;
+    }
+
+    .shadow-effect:after {
+        right: 10px;
+        left: auto;
+        -webkit-transform: skew(8deg) rotate(3deg);
+        -moz-transform: skew(8deg) rotate(3deg);
+        -ms-transform: skew(8deg) rotate(3deg);
+        -o-transform: skew(8deg) rotate(3deg);
+        transform: skew(8deg) rotate(3deg);
+    }
+
+    .border-2 {
+        border: 2px solid #ddd;
+    }
+    </style>
+</head>
+
+<body>
+    <main>
+        <section id="intro">
+            <div class="headline">
+                <div class="left-placeholder"></div>
+                <div class="headline-text">
+                    <div class="main-header">Indian Railways witness safest year ever</div>
+                    <div class="sub-header">
+                        First time in 166 years, Indian Railways witnessed 0 passengers deaths due to accidents! Read more to know how it happened.
+                    </div>
+                </div>
+            </div>
+            <img src="background-edit.jpg" class="main-img">
+            <!--<div class="shadow"></div>-->
+        </section>
+        <section id="section-1">
+            <div class="flex-container">
+                <div class="section-1-text">
+                    Among the world's Top 10 largest employer, Indian Railways achieved a magnificent feat of witnessing zero passengers death in India. Being the cheapest commercial mode of transport in India and servicing millions of passengers everyday, running this huge operation day in and day out is no easy task.
+                </div>
+                <div class="section-1-pic">
+                    <img class="shadow-effect border-2" src="1.jpg">
+                    <!--<credit>Kartik Kumar S - https://www.flickr.com/photos/kartikkumars/24114443722/</credit>-->
+                </div>
+            </div>
+            <!--<div class="flex-container">
+                <div class="section-1-text">
+                    Among the world's Top 10 largest employer, Indian Railways achieved a magnificent feat of witnessing zero passengers death in India. Being the cheapest commercial mode of transport in India and servicing millions of passengers everyday, running this huge operation day in and day out is no easy task.
+                </div>
+                <div class="section-1-pic">
+                    <img class="shadow-effect border-2" src="3.jpeg">
+                    <credit>Rajan K Dey - https://halla.in/user_profile/20169</credit>
+                </div>
+            </div>-->
+        </section>
+        <section id="scrolly">
+            <div class="background-overlay">
+                <div id="map-wrapper"></div>
+            </div>
+            <article>
+                <div class="step" data-step="1">
+                    <p>STEP 1</p>
+                </div>
+                <div class="step" data-step="2">
+                    <p>STEP 2</p>
+                </div>
+                <div class="step" data-step="3">
+                    <p>STEP 3</p>
+                </div>
+                <div class="step" data-step="4">
+                    <p>STEP 4</p>
+                </div>
+            </article>
+        </section>
+        <section id="outro"></section>
+    </main>
+    <!-- <div class='debug'></div> -->
+    <script src="https://unpkg.com/d3@5.9.1/dist/d3.min.js"></script>
+    <script src="https://unpkg.com/intersection-observer@0.5.1/intersection-observer.js"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <!--<script src="./stickyfill.min.js"></script>-->
+    <script src="./scrollama.min.js"></script>
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.6.1/mapbox-gl.js"></script>
+    <script>
+    // Default Configs
+    mapboxgl.accessToken = 'pk.eyJ1IjoiYWtzaGF5dmVybWEiLCJhIjoiY2lpMG1xdzEzMDR5bXUxbTFxYmN4M3Q4diJ9.B1Vnb4Q-IBGGp4lRmUCO4A';
+
+    var targetPoint = {
+        "center": [74.0, 22.0],
+        "pitch": 0,
+        "zoom": 4,
+        "bearing": 0
+    };
+
+    var size = 200;
+
+    // implementation of CustomLayerInterface to draw a pulsing dot icon on the map
+    // see https://docs.mapbox.com/mapbox-gl-js/api/#customlayerinterface for more info
+    var pulsingDot = {
+        width: size,
+        height: size,
+        data: new Uint8Array(size * size * 4),
+
+        // get rendering context for the map canvas when layer is added to the map
+        onAdd: function() {
+            var canvas = document.createElement('canvas');
+            canvas.width = this.width;
+            canvas.height = this.height;
+            this.context = canvas.getContext('2d');
+        },
+
+        // called once before every frame where the icon will be used
+        render: function() {
+            var duration = 1000;
+            var t = (performance.now() % duration) / duration;
+
+            var radius = (size / 2) * 0.3;
+            var outerRadius = (size / 2) * 0.7 * t + radius;
+            var context = this.context;
+
+            // draw outer circle
+            context.clearRect(0, 0, this.width, this.height);
+            context.beginPath();
+            context.arc(
+                this.width / 2,
+                this.height / 2,
+                outerRadius,
+                0,
+                Math.PI * 2
+            );
+            context.fillStyle = 'rgba(255, 200, 200,' + (1 - t) + ')';
+            context.fill();
+
+            // draw inner circle
+            context.beginPath();
+            context.arc(
+                this.width / 2,
+                this.height / 2,
+                radius,
+                0,
+                Math.PI * 2
+            );
+            context.fillStyle = 'rgba(191, 145, 40, 1)';
+            context.strokeStyle = 'white';
+            context.lineWidth = 2 + 4 * (1 - t);
+            context.fill();
+            context.stroke();
+
+            // update this image's data with data from the canvas
+            this.data = context.getImageData(
+                0,
+                0,
+                this.width,
+                this.height
+            ).data;
+
+            // continuously repaint the map, resulting in the smooth animation of the dot
+            map.triggerRepaint();
+
+            // return `true` to let the map know that the image was updated
+            return true;
+        }
+    };
+
+
+    var accidentPoints19 = {
+        'type': 'geojson',
+        'data': {
+            'type': 'FeatureCollection',
+            'features': [{
+                    // feature for Mapbox DC
+                    'type': 'Feature',
+                    'geometry': {
+                        'type': 'Point',
+                        'coordinates': [
+                            85.788056,
+                            20.523611
+                        ]
+                    },
+                    'properties': {
+                        'title': 'Cuttack',
+                    }
+                },
+                {
+                    // feature for Mapbox SF
+                    'type': 'Feature',
+                    'geometry': {
+                        'type': 'Point',
+                        'coordinates': [89.451, 26.32419]
+                    },
+                    'properties': {
+                        'title': 'Cooch Behar',
+                        'icon': 'harbor'
+                    }
+                },
+                {
+                    // feature for Mapbox SF
+                    'type': 'Feature',
+                    'geometry': {
+                        'type': 'Point',
+                        'coordinates': [95, 27.48]
+                    },
+                    'properties': {
+                        'title': 'Dibrugarh',
+                        'icon': 'harbor'
+                    }
+                },
+                {
+                    // feature for Mapbox SF
+                    'type': 'Feature',
+                    'geometry': {
+                        'type': 'Point',
+                        'coordinates': [91.733333, 26.183333]
+                    },
+                    'properties': {
+                        'title': 'Kamrup Metropolitan',
+                        'icon': 'harbor'
+                    }
+                },
+                {
+                    // feature for Mapbox SF
+                    'type': 'Feature',
+                    'geometry': {
+                        'type': 'Point',
+                        'coordinates': [88.73, 26.52]
+                    },
+                    'properties': {
+                        'title': 'Jalpaiguri',
+                        'icon': 'harbor'
+                    }
+                },
+                {
+                    // feature for Mapbox SF
+                    'type': 'Feature',
+                    'geometry': {
+                        'type': 'Point',
+                        'coordinates': [92.35, 24.87]
+                    },
+                    'properties': {
+                        'title': 'Karimganj',
+                        'icon': 'harbor'
+                    }
+                },
+                {
+                    // feature for Mapbox SF
+                    'type': 'Feature',
+                    'geometry': {
+                        'type': 'Point',
+                        'coordinates': [74.7451, 13.3389]
+                    },
+                    'properties': {
+                        'title': 'Udupi',
+                        'icon': 'harbor'
+                    }
+                },
+                {
+                    // feature for Mapbox SF
+                    'type': 'Feature',
+                    'geometry': {
+                        'type': 'Point',
+                        'coordinates': [80.2321, 26.4148]
+                    },
+                    'properties': {
+                        'title': 'Kanpur Nagar',
+                        'icon': 'harbor'
+                    }
+                },
+            ]
+        }
+    }
+
+
+    var source = {
+        "center": [72.778088, 18.998330],
+        "pitch": 50,
+        "zoom": 10,
+        "bearing": 0
+    };
+
+    var map = new mapboxgl.Map({
+        container: 'map-wrapper',
+        style: 'mapbox://styles/akshayverma/cjowp41dx8g0l2sphj2gywk9y',
+        // camera options properties - https://docs.mapbox.com/help/glossary/camera/
+        center: source.center,
+        pitch: source.pitch, // pitch in degrees
+        bearing: source.bearing, // bearing in degrees
+        zoom: source.zoom
+    });
+
+
+
+
+
+    map.scrollZoom.disable();
+
+    // using d3 for convenience
+    var main = d3.select("main");
+    var scrolly = main.select("#scrolly");
+    var figure = scrolly.select(".background-overlay");
+    var article = scrolly.select("article");
+    var step = article.selectAll(".step");
+
+    figure.style("opacity", 1)
+
+    // initialize the scrollama
+    var scroller = scrollama();
+
+    // generic window resize listener event
+    function handleResize() {
+        // 1. update height of step elements
+        var stepH = Math.floor(window.innerHeight * 0.75);
+        step.style("height", stepH + "px");
+
+        var figureHeight = window.innerHeight;
+        console.log(figureHeight);
+        var figureMarginTop = (window.innerHeight - figureHeight) / 2;
+
+        figure
+            .style("height", figureHeight + "px")
+            .style("top", figureMarginTop + "px");
+
+        // 3. tell scrollama to update new element dimensions
+        scroller.resize();
+    }
+
+    function changeLocationOnMap(toPoint) {
+        console.log(toPoint);
+
+        /*map.flyTo({
+                // These options control the ending camera position: centered at
+                // the target, at zoom level 9, and north up.
+                center: toPoint.coordinate,
+                zoom: toPoint.zoom,
+                pitch: toPoint.pitch,
+                bearing: toPoint.bearing,
+
+                // These options control the flight curve, making it move
+                // slowly and zoom out almost completely before starting
+                // to pan.
+                speed: 3 , // make the flying slow
+                curve: 1, // change the speed at which it zooms out
+                essential: true,
+                // This can be any easing function: it takes a number between
+                // 0 and 1 and returns another number between 0 and 1.
+                easing: function(t) {
+                    return t;
+                },
+
+                // this animation is considered essential with respect to prefers-reduced-motion
+                essential: true
+            })*/
+
+        map.flyTo(toPoint);
+
+    }
+
+
+    // scrollama event handlers
+    function handleStepEnter(response) {
+
+        // response = { element, direction, index }
+
+        // add color to current step only
+        step.classed("is-active", function(d, i) {
+            return i === response.index;
+        });
+
+        console.log(response.index)
+
+        // update graphic based on step
+        //figure.select("p").text(response.index + 1);
+        //
+        if (response.index == 0) {
+            changeLocationOnMap(source)
+
+            // Hide Layers            
+            map.setLayoutProperty("acc-layers-19", 'visibility', 'none');
+            map.setLayoutProperty("railway-schema-svg", 'visibility', 'none');
+
+            // Show Layers
+            map.setLayoutProperty("sec-1", 'visibility', 'visible');
+
+        } else if (response.index == 1) {
+            changeLocationOnMap(targetPoint)
+
+            // Hide Layers
+            map.setLayoutProperty("sec-1", 'visibility', 'none');
+            map.setLayoutProperty("acc-layers-19", 'visibility', 'none');
+
+            // Show Layers
+            map.setLayoutProperty("railway-schema-svg", 'visibility', 'visible')
+            setTimeout(function() {  }, 1000);
+        } else if (response.index == 2) {
+            changeLocationOnMap(targetPoint)
+
+            // Hide Layers
+            map.setLayoutProperty("sec-1", 'visibility', 'none');
+            map.setLayoutProperty("railway-schema-svg", 'visibility', 'none')
+
+            // Show Layers
+            map.setLayoutProperty("acc-layers-19", 'visibility', 'visible');
+            setTimeout(function() {}, 2000);
+        }
+
+
+    }
+
+    function setupStickyfill() {
+        d3.selectAll(".sticky").each(function() {
+            Stickyfill.add(this);
+        });
+    }
+
+    function handleProgress(response) {
+        console.log(response)
+
+        //map.setOpacity(response.progress);
+
+        if (response.index < 1) {
+
+            figure.transition().delay(100).style("opacity", 1);
+        }
+    }
+
+    function init() {
+
+        map.on("load", function() {
+
+            map.addImage('pulsing-dot', pulsingDot, { pixelRatio: 2 });
+
+            map.addSource('acc-points-19', accidentPoints19);
+
+            map.addSource("railway-schema", {
+                "type": "image",
+                "url": "railway_map.png",
+                "coordinates": [
+                    [68.278088, 35.798330],
+                    [96.578088, 35.798330],
+                    [96.578088, 7.598330],
+                    [68.278088, 7.598330]
+                ]
+            });
+
+            map.addSource('points', {
+                'type': 'geojson',
+                'data': {
+                    'type': 'FeatureCollection',
+                    'features': [{
+                            'type': 'Feature',
+                            'geometry': {
+                                'type': 'Point',
+                                'coordinates': [72.8355, 18.9398]
+                            },
+                            'properties': {
+                                'title': 'Bori Bundar',
+
+                            }
+                        },
+                        {
+                            'type': 'Feature',
+                            'geometry': {
+                                'type': 'Point',
+                                'coordinates': [72.975833, 19.186111]
+                            },
+                            'properties': {
+                                'title': 'Thane',
+
+                            }
+                        }
+                    ]
+                }
+            });
+
+            map.addLayer({
+                "id": "railway-schema-svg",
+                "source": "railway-schema",
+                "type": "raster",
+                "paint": {
+                    "raster-opacity": 0.85
+                }
+            });
+
+            map.addLayer({
+                'id': 'sec-1',
+                'type': 'symbol',
+                'source': 'points',
+                'layout': {
+                    'icon-image': 'pulsing-dot',
+                    'text-field': ['get', 'title'],
+                    'text-font': ["Open Sans Semibold", "Arial Unicode MS Bold"],
+                    'text-offset': [2, 1],
+                    'text-anchor': 'left'
+                },
+                paint: {
+                    "text-color": "#ffffff"
+                }
+            });
+
+            map.addLayer({
+                'id': 'acc-layers-19',
+                'type': 'symbol',
+                'source': 'acc-points-19',
+                'layout': {
+                    'icon-image': 'pulsing-dot',
+                    'icon-allow-overlap': true,
+                    'text-field': ['get', 'title'],
+                    'text-font': ["Open Sans Semibold", "Arial Unicode MS Bold"],
+                    'text-offset': [1, 0.5],
+                    'text-anchor': 'left'
+                },
+                paint: {
+                    "text-color": "#ffffff"
+                }
+            });
+
+            map.setLayoutProperty("railway-schema-svg", 'visibility', 'none');
+            map.setLayoutProperty("acc-layers-19", 'visibility', 'none');
+            map.setLayoutProperty("sec-1", 'visibility', 'none');
+
+        })
+
+        setupStickyfill();
+
+        // 1. force a resize on load to ensure proper dimensions are sent to scrollama
+        handleResize();
+
+
+        // 2. setup the scroller passing options
+        //      this will also initialize trigger observations
+        // 3. bind scrollama event handlers (this can be chained like below)
+        scroller
+            .setup({
+                step: "#scrolly article .step",
+                offset: 0.5,
+                progress: true,
+                debug: false
+            })
+            //.onStepProgress(handleProgress)
+            .onStepEnter(handleStepEnter);
+
+
+        // setup resize event
+        window.addEventListener("resize", handleResize);
+    }
+
+    // kick things off
+    init();
+    </script>
+</body>
+
+</html>
